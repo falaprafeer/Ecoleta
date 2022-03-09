@@ -23,12 +23,16 @@ function getCities(event) {
     stateInput.value = event.target.options[indexOfSelectedState].text
 
     const url = `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${ufValue}/municipios`
+        //clear select
+        citySelect.innerHTML = ''
+        //disabled select
+        citySelect.disabled = false
 
     fetch(url)
     .then( res => res.json()) 
     .then( cities => {
         for( const city of cities) {
-            citySelect.innerHTML += `<option value="${city.id}">${city.nome}</option>`
+            citySelect.innerHTML += `<option value="${city.name}">${city.nome}</option>`
         }
         citySelect.disabled = false
     })
@@ -37,3 +41,47 @@ function getCities(event) {
 document
     .querySelector("select[name=uf]")
     .addEventListener("change", getCities)
+
+// Itens De Coleta
+
+//get all <li>
+const itensToCollect = document.querySelectorAll(".itens-grid li")
+for (const item of itensToCollect) {
+    item.addEventListener("click", handleSelectedItem)
+}
+
+const collectedItens = document.querySelector("input[name=itens]")
+
+let selectedItens = []
+
+function handleSelectedItem(event){
+    const itemLi = event.target
+    
+    // add or remove class with js
+    itemLi.classList.toggle("selected")
+
+    const itemId = itemLi.dataset.id
+    
+    // Verificar se existem itens selecionados, se sim
+    // pegar os items selecionados
+    const alreadySelected = selectedItens.findIndex( item => {
+        const itemFound = item === itemId
+        return itemFound
+    })
+
+    //se ja estiver selecionado, tirar seleção
+    if( alreadySelected >= 0 ) {
+        const filteredItens = selectedItens.filter( (item) =>{
+            const itemIsDifferent = item != itemId
+            return itemIsDifferent
+        })
+
+        selectedItens = filteredItens
+    } else {
+        // se não estiver selecionado, adicionar a seleção
+        selectedItens.push(itemId)
+    }
+
+    // atualizar o input hidden com os itens selecionado
+    collectedItens.value = selectedItens
+}
